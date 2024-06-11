@@ -16,6 +16,19 @@ class Date<T : DateTime?>(val expr: Expression<T>) : Function<DateTime>(DateColu
     }
 }
 
+/** Represents an SQL function that extracts the time part from a given datetime [expr]. */
+class Time<T : DateTime?>(val expr: Expression<T>) : Function<DateTime>(DateColumnType(true)) {
+    override fun toQueryBuilder(queryBuilder: QueryBuilder) = queryBuilder {
+        val dialect = currentDialect
+        val functionProvider = when (dialect.h2Mode) {
+            H2Dialect.H2CompatibilityMode.SQLServer, H2Dialect.H2CompatibilityMode.PostgreSQL ->
+                (dialect as H2Dialect).originalFunctionProvider
+            else -> dialect.functionProvider
+        }
+        functionProvider.time(expr, queryBuilder)
+    }
+}
+
 /**
  * Represents an SQL function that returns the current date and time, as [DateTime]
  *
@@ -119,6 +132,9 @@ class Second<T : DateTime?>(val expr: Expression<T>) : Function<Int>(IntegerColu
 
 /** Returns the date from this datetime expression. */
 fun <T : DateTime?> Expression<T>.date() = Date(this)
+
+/** Returns the time from this datetime expression. */
+fun <T : DateTime?> Expression<T>.time() = Time(this)
 
 /** Returns the year from this datetime expression, as an integer. */
 fun <T : DateTime?> Expression<T>.year() = Year(this)

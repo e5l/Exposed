@@ -30,7 +30,7 @@ import org.joda.time.DateTimeZone
 import org.junit.Test
 import kotlin.test.assertEquals
 
-open class JodaTimeBaseTest : DatabaseTestsBase() {
+class JodaTimeTests : DatabaseTestsBase() {
     init {
         DateTimeZone.setDefault(DateTimeZone.UTC)
     }
@@ -377,7 +377,7 @@ open class JodaTimeBaseTest : DatabaseTestsBase() {
 
                     SchemaUtils.create(testTable)
 
-                    val now = DateTime.now(DateTimeZone.getDefault())
+                    val now = DateTime.parse("2023-05-04T05:04:01.712+00:00")
                     val nowId = testTable.insertAndGetId {
                         it[timestampWithTimeZone] = now
                     }
@@ -386,6 +386,12 @@ open class JodaTimeBaseTest : DatabaseTestsBase() {
                         DateTime(now.year, now.monthOfYear, now.dayOfMonth, 0, 0),
                         testTable.select(testTable.timestampWithTimeZone.date()).where { testTable.id eq nowId }
                             .single()[testTable.timestampWithTimeZone.date()]
+                    )
+
+                    assertEquals(
+                        DateTime(1970, 1, 1, now.hourOfDay, now.minuteOfHour, now.secondOfMinute, now.millisOfSecond),
+                        testTable.select(testTable.timestampWithTimeZone.time()).where { testTable.id eq nowId }
+                            .single()[testTable.timestampWithTimeZone.time()]
                     )
                 } finally {
                     SchemaUtils.drop(testTable)

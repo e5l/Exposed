@@ -4,12 +4,7 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ColumnType
 import org.jetbrains.exposed.sql.IDateColumnType
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.vendors.H2Dialect
-import org.jetbrains.exposed.sql.vendors.MysqlDialect
-import org.jetbrains.exposed.sql.vendors.OracleDialect
-import org.jetbrains.exposed.sql.vendors.PostgreSQLDialect
-import org.jetbrains.exposed.sql.vendors.SQLiteDialect
-import org.jetbrains.exposed.sql.vendors.currentDialect
+import org.jetbrains.exposed.sql.vendors.*
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
@@ -41,11 +36,13 @@ private val MYSQL_FRACTION_DATE_TIME_AS_DEFAULT_FORMATTER by lazy {
 }
 
 private fun formatterForDateTimeString(date: String) = dateTimeWithFractionFormat(
+    date,
     date.substringAfterLast('.', "").length
 )
 
-private fun dateTimeWithFractionFormat(fraction: Int): DateTimeFormatter {
-    val baseFormat = "YYYY-MM-dd HH:mm:ss"
+private fun dateTimeWithFractionFormat(date: String, fraction: Int): DateTimeFormatter {
+    val containsDatePart = date.contains("T") || date.contains(" ")
+    val baseFormat = if (containsDatePart) "YYYY-MM-dd HH:mm:ss" else "HH:mm:ss"
     val newFormat = baseFormat + if (fraction in 1..9) ".${"S".repeat(fraction)}" else ""
     return DateTimeFormat.forPattern(newFormat)
 }

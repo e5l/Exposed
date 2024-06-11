@@ -29,7 +29,7 @@ import java.time.ZoneOffset
 import kotlin.test.assertEquals
 import kotlin.time.Duration
 
-open class KotlinTimeBaseTest : DatabaseTestsBase() {
+class KotlinTimeTests : DatabaseTestsBase() {
 
     @Test
     fun kotlinTimeFunctions() {
@@ -469,7 +469,7 @@ open class KotlinTimeBaseTest : DatabaseTestsBase() {
 
                     SchemaUtils.create(testTable)
 
-                    val now = OffsetDateTime.now(ZoneId.systemDefault())
+                    val now = OffsetDateTime.parse("2023-05-04T05:04:01.700+00:00")
                     val nowId = testTable.insertAndGetId {
                         it[timestampWithTimeZone] = now
                     }
@@ -478,6 +478,12 @@ open class KotlinTimeBaseTest : DatabaseTestsBase() {
                         now.toLocalDate().toKotlinLocalDate(),
                         testTable.select(testTable.timestampWithTimeZone.date()).where { testTable.id eq nowId }
                             .single()[testTable.timestampWithTimeZone.date()]
+                    )
+
+                    assertEquals(
+                        now.toLocalTime().toKotlinLocalTime(),
+                        testTable.select(testTable.timestampWithTimeZone.time()).where { testTable.id eq nowId }
+                            .single()[testTable.timestampWithTimeZone.time()]
                     )
 
                     assertEquals(

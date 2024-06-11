@@ -33,7 +33,7 @@ import java.time.*
 import java.time.temporal.Temporal
 import kotlin.test.assertEquals
 
-open class JavaTimeBaseTest : DatabaseTestsBase() {
+class JavaTimeTests : DatabaseTestsBase() {
 
     @Test
     fun javaTimeFunctions() {
@@ -481,6 +481,12 @@ open class JavaTimeBaseTest : DatabaseTestsBase() {
                         now.toLocalDate(),
                         testTable.select(testTable.timestampWithTimeZone.date()).where { testTable.id eq nowId }
                             .single()[testTable.timestampWithTimeZone.date()]
+                    )
+
+                    assertEquals(
+                        now.toLocalTime(),
+                        testTable.select(testTable.timestampWithTimeZone.time()).where { testTable.id eq nowId }
+                            .single()[testTable.timestampWithTimeZone.time()]
                     )
 
                     assertEquals(
